@@ -1,7 +1,6 @@
 import numpy as np
-import soundfile as sf
-from scipy.signal import chirp
-
+from scipy.signal import chirp, spectrogram
+import matplotlib.pyplot as plt
 
 
 
@@ -26,10 +25,13 @@ def fin_whale_call(fs=200,dur=1.2,f0=26.0,f1=18.0,harmonics=True):
 
 
 def plot_spectrogram(y, fs):
-    import matplotlib.pyplot as plt
-    from scipy.signal import spectrogram
+    # f, t, Sxx = spectrogram(y, fs=fs, nperseg=256, noverlap=128)
+    nperseg = min(128, len(y))
+    noverlap = min(96, nperseg - 1)
+    f, t, Sxx = spectrogram(y, fs=fs, nperseg=nperseg, noverlap=noverlap)
 
-    f, t, Sxx = spectrogram(y, fs=fs, nperseg=256, noverlap=128)
+
+    # plotting
     plt.figure(figsize=(10, 4))
     plt.pcolormesh(t, f, 10 * np.log10(Sxx + 1e-12), shading='gouraud')
     plt.colorbar(label='Intensity [dB]')
@@ -39,6 +41,7 @@ def plot_spectrogram(y, fs):
 
 def main():
     audio, fs = fin_whale_call(fs=200, dur=1.2, f0=26, f1=18, harmonics=True)
+    plot_spectrogram(audio, fs)
     # sf.write("synthetic_fin_whale_call.wav", audio, fs)
     
 
