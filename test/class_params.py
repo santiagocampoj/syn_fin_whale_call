@@ -22,3 +22,13 @@ class PulseParams:
     f1: float = 17.0
     inter_pulse_gap: float = 0.22 #it was raised from 0.12 to 0.22 s (doublet visible)
     amplitude: float = 0.95
+
+
+@dataclass
+class InjectionEvent:
+    call_type: str # "downsweep" or "pulse"
+    offset_s: float # start time in the mixed recording (seconds)
+    duration_s: float # duration of the call (seconds)
+    snr_db: float # target SNR (dB) used for scaling
+    actual_snr_db: float # SNR measured after injection (sanity check)
+    scale_factor: float # amplitude scale applied to the call

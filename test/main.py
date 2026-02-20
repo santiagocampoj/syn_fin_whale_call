@@ -17,6 +17,10 @@ from synthesize_signal import fin_whale_downsweep, fin_whale_pulse
 from utils_plot import plot_spec
 from database_generator import generate_database
 from logging_config import setup_logging
+from call_injection import load_background
+
+from config import *
+
 
 
 
@@ -35,6 +39,8 @@ def main():
 
     ##########################
     # Downsweep
+    logger.info("")
+    logger.info("Generating a sample downsweep call")
     dp = DownsweepParams()
     rp_ds = randomize_downsweep(dp)
     ds_audio = fin_whale_downsweep(rp_ds)
@@ -44,7 +50,10 @@ def main():
 
 
     ##########################
-    #20 Hz pulse preview
+    #20 Hz pulse
+    logger.info("")
+    logger.info("Generating a sample 20 Hz pulse call")
+    
     pp = PulseParams()
     rp_p = randomize_pulse(pp)
     pulse_audio = fin_whale_pulse(rp_p)
@@ -56,6 +65,8 @@ def main():
 
     ##########################
     #test database
+    logger.info("")
+    logger.info("Generating a test database with 10 downsweep and 10 pulse calls")
     generate_database(
         out_dir="fin_whale_db",
         n_downsweep=10,
@@ -64,6 +75,28 @@ def main():
         seed=42,
         logger=logger,
     )
+
+
+
+    ###########################
+    #injection dataset into a real sea noise recording
+    logger.info("")
+    logger.info("Injecting synthetic calls into a real sea noise recording")
+
+    background, fs = load_background(
+        wav_path=SEA_RECORDING,
+        fs_target=int(dp.fs),
+        chunk_start_s=0.0,
+        chunk_dur_s=60.0,
+        logger=logger,
+    )
+
+
+    # play the background audio to listen to the output
+    
+
+
+
 
 
 if __name__ == "__main__":
