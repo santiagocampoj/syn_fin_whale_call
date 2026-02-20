@@ -17,6 +17,7 @@ def generate_database(
         pulse_params: Optional[PulseParams] = None,
         delta: float = 1.0,
         seed: Optional[int] = 42,
+        logger=None,
 ) -> str:
     
 
@@ -36,7 +37,7 @@ def generate_database(
     
     
     ##########################
-    print(f"Generating {n_downsweep} downsweep calls...")
+    logger.info(f"Generating {n_downsweep} downsweep calls...")
     for i in range(n_downsweep):
         rp = randomize_downsweep(dp, delta=delta)
         audio = fin_whale_downsweep(rp)
@@ -58,7 +59,7 @@ def generate_database(
     
     
     ##########################
-    print(f"Generating {n_pulse} pulse calls...")
+    logger.info(f"Generating {n_pulse} pulse calls...")
     for i in range(n_pulse):
         rp = randomize_pulse(pp, delta=delta)
         audio = fin_whale_pulse(rp)
@@ -89,8 +90,8 @@ def generate_database(
 
 
 
-    print(f"\nDatabase complete!")
-    print(f"Downsweep calls: {n_downsweep} -> {ds_dir}")
-    print(f"Pulse calls: {n_pulse} ->{pulse_dir}")
-    print(f"Metadata CSV: {csv_path}")
+    logger.info(f"\nDatabase complete!")
+    logger.info(f"Downsweep calls: {n_downsweep} -> {ds_dir}")
+    logger.info(f"Pulse calls: {n_pulse} ->{pulse_dir}")
+    logger.info(f"Metadata CSV: {csv_path}")
     return csv_path

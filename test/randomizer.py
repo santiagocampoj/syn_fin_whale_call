@@ -2,6 +2,9 @@ from class_params import DownsweepParams, PulseParams
 import numpy as np
 
 
+# ?????
+np.random.seed(0)
+
 
 def randomize(value: float, delta: float = 1.0, rel: bool = False) -> float:
     if rel:

@@ -9,27 +9,36 @@ Parameter randomization is applied per call to simulate natural biological varia
 A batch generator creates a labelled database of .wav files + a metadata CSV.
 """
 
-import numpy as np
-
+import argparse
 
 from class_params import DownsweepParams, PulseParams
 from randomizer import randomize_downsweep, randomize_pulse
 from synthesize_signal import fin_whale_downsweep, fin_whale_pulse
 from utils_plot import plot_spec
 from database_generator import generate_database
+from logging_config import setup_logging
 
 
+
+def argument_parser():
+    parser = argparse.ArgumentParser(description="Process XML transcript pipeline")
+    parser.add_argument("-p", "--path", required=False, help="Path to input XML file")
+    return parser.parse_args()
 
 
 def main():
-    np.random.seed(0)
+    # initializing
+    logger = setup_logging()
+    args = argument_parser()
+    logger.info(f"Starting fin whale call synthesis")
+
 
     ##########################
     # Downsweep
     dp = DownsweepParams()
     rp_ds = randomize_downsweep(dp)
     ds_audio = fin_whale_downsweep(rp_ds)
-    print(f"Downsweep: f0={rp_ds.f0:.1f} Hz -> f1={rp_ds.f1:.1f} Hz, "
+    logger.info(f"Downsweep: f0={rp_ds.f0:.1f} Hz -> f1={rp_ds.f1:.1f} Hz, "
           f"dur={rp_ds.dur:.3f}s, tau={rp_ds.tau:.3f}")
     plot_spec(ds_audio, int(rp_ds.fs), "Fin Whale Downsweep for 50 Hz component")
 
@@ -39,7 +48,7 @@ def main():
     pp = PulseParams()
     rp_p = randomize_pulse(pp)
     pulse_audio = fin_whale_pulse(rp_p)
-    print(f"Pulse: f0={rp_p.f0:.1f} Hz -> f1={rp_p.f1:.1f} Hz, "
+    logger.info(f"Pulse: f0={rp_p.f0:.1f} Hz -> f1={rp_p.f1:.1f} Hz, "
           f"pulse_dur={rp_p.pulse_dur:.3f}s, gap={rp_p.inter_pulse_gap:.3f}s")
     plot_spec(pulse_audio, int(rp_p.fs), "Fin Whale 20 Hz Pulse (doublet)")
 
@@ -53,6 +62,7 @@ def main():
         n_pulse=10,
         delta=1.0,
         seed=42,
+        logger=logger,
     )
 
 

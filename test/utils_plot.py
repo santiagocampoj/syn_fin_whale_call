@@ -17,4 +17,7 @@ def plot_spec(audio, fs, title):
     plt.colorbar(label="dB")
     plt.ylim(0, 200)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+
+    # save
+    plt.savefig(f"{title.replace(' ', '_').lower()}.png", dpi=300)
