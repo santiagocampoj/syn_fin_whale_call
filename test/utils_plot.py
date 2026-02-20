@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 from scipy.signal import spectrogram as scipy_spectrogram
+import numpy as np
+
 
 
 def plot_spec(audio, fs, title):

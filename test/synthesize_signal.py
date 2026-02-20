@@ -1,6 +1,8 @@
 from class_params import DownsweepParams, PulseParams
 import numpy as np
-from scipy.signal import chirp, tukey, hann
+# from scipy.signal import chirp, tukey, hann
+from scipy.signal import chirp
+from scipy.signal.windows import tukey, hann
 
 
 
