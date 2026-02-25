@@ -9,18 +9,7 @@ from synthesize_signal import fin_whale_downsweep, fin_whale_pulse
 
 
 
-def generate_database(
-        out_dir: str,
-        n_downsweep: int = 100,
-        n_pulse: int = 100,
-        downsweep_params: Optional[DownsweepParams] = None,
-        pulse_params: Optional[PulseParams] = None,
-        delta: float = 1.0,
-        seed: Optional[int] = 42,
-        logger=None,
-) -> str:
-    
-
+def generate_database(out_dir: str,n_downsweep: int = 100,n_pulse: int = 100,downsweep_params: Optional[DownsweepParams] = None,pulse_params: Optional[PulseParams] = None,delta: float = 1.0,seed: Optional[int] = 42,logger=None) -> str:
     if seed is not None:
         np.random.seed(seed)
 
@@ -78,7 +67,7 @@ def generate_database(
             "inter_pulse_gap": round(rp.inter_pulse_gap, 4),
         })
 
-
+    ##########################
     # save
     csv_path = os.path.join(out_dir, "metadata.csv")
     fieldnames = ["filename", "label", "fs", "dur", "f0", "f1",
@@ -89,7 +78,7 @@ def generate_database(
         writer.writerows(metadata_rows)
 
 
-
+    ###########################
     logger.info(f"\nDatabase complete!")
     logger.info(f"Downsweep calls: {n_downsweep} -> {ds_dir}")
     logger.info(f"Pulse calls: {n_pulse} ->{pulse_dir}")

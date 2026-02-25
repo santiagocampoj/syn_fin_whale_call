@@ -30,9 +30,9 @@ def randomize_downsweep(p: DownsweepParams, delta: float = 1.0) -> DownsweepPara
 def randomize_pulse(p: PulseParams, delta: float = 1.0) -> PulseParams:
     return PulseParams(
         fs=p.fs,
-        pulse_dur=randomize(p.pulse_dur, delta=delta * 0.05, rel=True),
-        f0=randomize(p.f0, delta=delta * 0.5),
-        f1=randomize(p.f1, delta=delta * 0.5),
-        inter_pulse_gap=randomize(p.inter_pulse_gap, delta=delta * 0.01),
-        amplitude=randomize(p.amplitude,delta=delta * 0.03, rel=True),
+        pulse_dur=randomize(p.pulse_dur, delta=delta * 0.05, rel=True),# +-5% pulse duration
+        f0=randomize(p.f0, delta=delta * 0.5), # +-0.5 Hz start freq
+        f1=randomize(p.f1, delta=delta * 0.5), # +-0.5 Hz end freq
+        inter_pulse_gap=randomize(p.inter_pulse_gap, delta=delta * 0.01),# +-10 ms gap
+        amplitude=randomize(p.amplitude,delta=delta * 0.03, rel=True),# +-3% amplitude
     )

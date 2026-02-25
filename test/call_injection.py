@@ -24,13 +24,17 @@ from class_params import InjectionEvent
 
 
 def _rms(x: np.ndarray) -> float:
-    """Root mean square of a signal."""
+    """
+     Root Mean Square — the standard way to measure the "average loudness" of a signal
+    Compute RMS of a signal, with a small epsilon to avoid divide-by-zero
+    """
     return float(np.sqrt(np.mean(x.astype(np.float64) ** 2)) + 1e-12)
 
 
 def _resample(audio: np.ndarray, orig_fs: int, target_fs: int) -> np.ndarray:
     """
-    Simple resample using scipy.  Only called when fs mismatch is detected.
+    Resample audio from orig_fs to target_fs using polyphase resampling.
+    This is more efficient and higher-quality than naive resampling, especially for large sample rate changes
     """
     g = gcd(orig_fs, target_fs)
     up, down = target_fs // g, orig_fs // g
@@ -124,32 +128,7 @@ def inject_call(background: np.ndarray,call: np.ndarray,offset_samples: int,snr_
 
 
 # main injection
-def inject_calls_into_recording(
-    background: np.ndarray,
-    fs: int,
-    calls: list[tuple[str, np.ndarray]],   # list ofcall_type, audio_array
-    snr_db_range: tuple[float, float] = (5.0, 20.0),
-    min_gap_s: float = 2.0,
-    seed: Optional[int] = None,
-    logger=None,
-) -> tuple[np.ndarray, list[InjectionEvent]]:
-    """
-    Inject multiple synthetic calls into a background recording.
-
-    Args:
-        background:    1-D float32 array of the background recording.
-        fs:            Sample rate (Hz).
-        calls:         List of (call_type_str, audio_array) tuples to inject.
-        snr_db_range:  (min_snr, max_snr) — each call gets a random SNR in this range.
-        min_gap_s:     Minimum silence gap between injected calls (seconds).
-        seed:          Random seed for reproducibility.
-        logger:        Optional logger.
-
-    Returns:
-        mixed:   The background with all calls injected.
-        events:  List of InjectionEvent describing each injection.
-    """
-
+def inject_calls_into_recording(background: np.ndarray,fs: int,calls: list[tuple[str, np.ndarray]],snr_db_range: tuple[float, float] = (5.0, 20.0),min_gap_s: float = 2.0,seed: Optional[int] = None,logger=None) -> tuple[np.ndarray, list[InjectionEvent]]:
 
     if seed is not None:
         np.random.seed(seed)
@@ -225,9 +204,6 @@ def inject_calls_into_recording(
 
 
 def save_injection_results(mixed: np.ndarray,fs: int,events: list[InjectionEvent],out_dir: str,out_name: str = "mixed_recording",logger=None) -> tuple[str, str]:
-    """
-    Save the mixed WAV file and a metadata CSV of injection events.
-    """
     os.makedirs(out_dir, exist_ok=True)
 
     wav_path = os.path.join(out_dir, f"{out_name}.wav")

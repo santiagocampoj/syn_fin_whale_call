@@ -11,14 +11,13 @@ A batch generator creates a labelled database of .wav files + a metadata CSV.
 
 import argparse
 
-from class_params import DownsweepParams, PulseParams
-from randomizer import randomize_downsweep, randomize_pulse
-from synthesize_signal import fin_whale_downsweep, fin_whale_pulse
-from utils_plot import plot_spec
-from database_generator import generate_database
+from class_params import *
+from randomizer import *
+from synthesize_signal import *
+from plots import plot_spec
+from database_generator import *
 from logging_config import setup_logging
-from call_injection import load_background
-
+from call_injection import *
 from config import *
 
 
@@ -38,33 +37,13 @@ def main():
 
 
     ##########################
-    # Downsweep
-    logger.info("")
-    logger.info("Generating a sample downsweep call")
-    dp = DownsweepParams()
-    rp_ds = randomize_downsweep(dp)
-    ds_audio = fin_whale_downsweep(rp_ds)
-    logger.info(f"Downsweep: f0={rp_ds.f0:.1f} Hz -> f1={rp_ds.f1:.1f} Hz, "
-          f"dur={rp_ds.dur:.3f}s, tau={rp_ds.tau:.3f}")
-    plot_spec(ds_audio, int(rp_ds.fs), "Fin Whale Downsweep for 50 Hz component")
-
-
-    ##########################
-    #20 Hz pulse
-    logger.info("")
-    logger.info("Generating a sample 20 Hz pulse call")
-    
-    pp = PulseParams()
-    rp_p = randomize_pulse(pp)
-    pulse_audio = fin_whale_pulse(rp_p)
-    logger.info(f"Pulse: f0={rp_p.f0:.1f} Hz -> f1={rp_p.f1:.1f} Hz, "
-          f"pulse_dur={rp_p.pulse_dur:.3f}s, gap={rp_p.inter_pulse_gap:.3f}s")
-    plot_spec(pulse_audio, int(rp_p.fs), "Fin Whale 20 Hz Pulse (doublet)")
+    # TEST
+    test_synth(logger=logger)
 
 
 
     ##########################
-    #test database
+    # database
     logger.info("")
     logger.info("Generating a test database with 10 downsweep and 10 pulse calls")
     generate_database(
@@ -79,9 +58,11 @@ def main():
 
 
     ###########################
+    # TODO:
     #injection dataset into a real sea noise recording
     logger.info("")
     logger.info("Injecting synthetic calls into a real sea noise recording")
+    exit()
 
     background, fs = load_background(
         wav_path=SEA_RECORDING,
@@ -90,7 +71,6 @@ def main():
         chunk_dur_s=60.0,
         logger=logger,
     )
-
 
     # play the background audio to listen to the output
     

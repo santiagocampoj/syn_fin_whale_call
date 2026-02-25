@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class DownsweepParams:
-    """Parameters for the 50 Hz downsweep call."""
+    """Parameters for the 50 Hz downsweep call"""
     fs: float = 1000.0 
     dur: float = 1.5 # raised from 0.8 to 1.5 s for real calls like 1–2 s
     f0: float = 90.0 # lowered from 110 to 90 Hz
@@ -15,7 +15,7 @@ class DownsweepParams:
 
 @dataclass
 class PulseParams:
-    """Parameters for the 20 Hz pulse call."""
+    """Parameters for the 20 Hz pulse call"""
     fs: float = 1000.0
     pulse_dur: float = 1.0
     f0: float = 22.0
@@ -26,6 +26,7 @@ class PulseParams:
 
 @dataclass
 class InjectionEvent:
+    """Metadata for a single call injection event"""
     call_type: str # "downsweep" or "pulse"
     offset_s: float # start time in the mixed recording (seconds)
     duration_s: float # duration of the call (seconds)
