@@ -1,47 +1,137 @@
-import numpy as np
-from scipy.signal import chirp, spectrogram
-import matplotlib.pyplot as plt
+"""
+Synthetic fin whale call generator for database creation.
+
+Two call types:
+  - Downsweep (~50 Hz component): logarithmic chirp with exponential decay
+  - 20 Hz pulse: short tonal call with slight downsweep, characteristic double pulse
+
+Parameter randomization is applied per call to simulate natural biological variability.
+A batch generator creates a labelled database of .wav files + a metadata CSV.
+"""
+
+import argparse
+
+from class_params import *
+from randomizer import *
+from synthesize_signal import *
+from plots import plot_spec
+from database_generator import *
+from logging_config import setup_logging
+from call_injection import *
+from config import *
+from snr_databse import *
 import soundfile as sf
-from utils import *
+import glob
 
 
 
-def fin_whale_downsweep(fs,dur,f0,f1,tau,harmonics=False):
-    t= np.linspace(0, dur, int(fs * dur), endpoint=False)
-    #phase in degrees
-    phi =np.random.uniform(0, 360)
 
-    #downsweep signal
-    y = chirp(t, f0=f0, f1=f1, t1=dur, method="logarithmic", phi=phi)
+def argument_parser():
+    parser = argparse.ArgumentParser(description="Process XML transcript pipeline")
+    parser.add_argument("-p", "--path", required=False, help="Path to input XML file")
+    return parser.parse_args()
 
-    # windowed envelope
-    # env = np.hanning(len(y))
-    # exponential decay, the bigger the tau the slower the decay
-    env= np.exp(-t/tau)
-    fade_n = max(1, int(0.02 * len(t)))
-    env[:fade_n] *= np.linspace(0, 1, fade_n)
-    # combined envelope
-    y = y * env
-
-    #harmonics ???
-    if harmonics:
-        y += 0.4 * chirp(t, f0=2*f0, f1=2*f1, t1=dur, method="logarithmic", phi=phi) * env
-        y += 0.2 * chirp(t, f0=3*f0, f1=3*f1, t1=dur, method="logarithmic", phi=phi) * env
-    # normalizing to -1 to 1
-    y = y / (np.max(np.abs(y)) + 1e-12) * 0.95
-    return y.astype(np.float32), fs
 
 
 
 def main():
-    audio, fs = fin_whale_downsweep(fs=20, dur=0.8, f0=110.0, f1=40.0, tau=0.25,harmonics=True)
-    plot_spectrogram(audio, fs)
-    exit()
-    sf.write("fin_whale_downsweep.wav", audio, fs)
+    # initializing
+    logger = setup_logging()
+    args = argument_parser()
+    logger.info(f"Starting fin whale call synthesis")
 
-    
 
-    print("Wrote fin_whale_downsweep.wav")
+    ##########################
+    # TEST
+    # test_synth(logger=logger)
+
+
+
+    ##########################
+    # database
+    logger.info("")
+    logger.info("Generating a test database with 10 downsweep and 10 pulse calls")
+    generate_database(
+        out_dir="fin_whale_db",
+        n_downsweep=10,
+        n_pulse=10,
+        delta=1.0, # parameter randomization range (0 = no randomization, 1 = full range)
+        seed=42,
+        logger=logger,
+    )
+
+
+
+    ###########################
+    # TODO:
+    #injection dataset into a real sea noise recording
+    logger.info("")
+    logger.info(f"Loading background recording from {SEA_RECORDING}")
+    dp = DownsweepParams()
+    background, fs = load_background(
+        wav_path=SEA_RECORDING,
+        fs_target=int(dp.fs),
+        chunk_start_s=0.0,
+        chunk_dur_s=120.0,
+        logger=logger,
+    )
+
+
+
+    ###########
+    logger.info("Loading calls from synthetic database for injection")
+
+    calls_to_inject = []
+    for fpath in sorted(glob.glob("fin_whale_db/downsweep/*.wav")):
+        audio, _ = sf.read(fpath, dtype="float32")
+        calls_to_inject.append(("downsweep", audio))
+
+    for fpath in sorted(glob.glob("fin_whale_db/pulse/*.wav")):
+        audio, _ = sf.read(fpath, dtype="float32")
+        calls_to_inject.append(("pulse", audio))
+    logger.info(f"Loaded {len(calls_to_inject)} calls from fin_whale_db/")
+
+
+
+
+    logger.info("")
+    logger.info("Injecting calls into ocean recording")
+    mixed, events = inject_calls_into_recording(
+        background=background,
+        fs=fs,
+        calls=calls_to_inject,
+        snr_db_range=(5.0, 20.0), # random SNR between 5 and 20 dB per call
+        min_gap_s=2.0, # at least 2 s between injected calls
+        seed=42,
+        logger=logger,
+    )
+
+    wav_path, csv_path = save_injection_results(
+        mixed=mixed,
+        fs=fs,
+        events=events,
+        out_dir="injection_test",
+        out_name="mixed_60s",
+        logger=logger,
+    )
+
+
+
+
+    logger.info("")
+    logger.info("Building SNR database from mixed recording")
+    build_snr_database(
+        mixed_wav=wav_path,
+        labels_csv=csv_path,
+        fs=fs,
+        out_dir="snr_database",
+        padding_s=0.5, # add x s of real ocean noise before/after each clip
+        logger=logger,
+    )
+
+    logger.info("")
+    logger.info("Execution complete")
+
 
 
 if __name__ == "__main__":
