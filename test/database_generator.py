@@ -21,12 +21,11 @@ def generate_database(out_dir: str,n_downsweep: int = 100,n_pulse: int = 100,dow
     os.makedirs(ds_dir, exist_ok=True)
     os.makedirs(pulse_dir, exist_ok=True)
 
-    metadata_rows = []
 
-    
-    
+
     ##########################
     logger.info(f"Generating {n_downsweep} downsweep calls...")
+    metadata_rows = []
     for i in range(n_downsweep):
         rp = randomize_downsweep(dp, delta=delta)
         audio = fin_whale_downsweep(rp)
@@ -72,6 +71,8 @@ def generate_database(out_dir: str,n_downsweep: int = 100,n_pulse: int = 100,dow
     csv_path = os.path.join(out_dir, "metadata.csv")
     fieldnames = ["filename", "label", "fs", "dur", "f0", "f1",
                   "tau", "harmonics", "amplitude", "inter_pulse_gap"]
+    
+
     with open(csv_path, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -79,8 +80,11 @@ def generate_database(out_dir: str,n_downsweep: int = 100,n_pulse: int = 100,dow
 
 
     ###########################
-    logger.info(f"\nDatabase complete!")
+    logger.info(f"Database complete!")
     logger.info(f"Downsweep calls: {n_downsweep} -> {ds_dir}")
     logger.info(f"Pulse calls: {n_pulse} ->{pulse_dir}")
     logger.info(f"Metadata CSV: {csv_path}")
-    return csv_path
+    
+    
+    
+    return csv_path, 

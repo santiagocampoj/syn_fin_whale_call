@@ -89,35 +89,37 @@ def load_background(wav_path: str,fs_target: int,chunk_start_s: float = 0.0,chun
 
 
 def inject_call(background: np.ndarray,call: np.ndarray,offset_samples: int,snr_db: float) -> tuple[np.ndarray, float, float]:
-    """
-    Insert a single call into the background at a given offset and SNR.
-
-    The call is scaled so that:
-        SNR (dB) = 20 * log10(call_rms / background_rms_in_window)
-    """
     mixed = background.copy()
     call_len = len(call)
     end = offset_samples + call_len
 
-    # Safety: clip if call extends past end of recording
+    # clip if call extends past end of recording
     if end > len(mixed):
         call = call[:len(mixed) - offset_samples]
         call_len = len(call)
         end = offset_samples + call_len
 
-    # Local background RMS in the injection window
+
+    ##################
+    # LOCAL background RMS in the injection window
     bg_window = mixed[offset_samples:end]
+    # MEASURE NOISE IN THE EXACT WINDOW (SNR)
     bg_rms = _rms(bg_window)
 
-    # Scale call to achieve target SNR
+    # SCALE call to achieve target SNR
     call_rms = _rms(call)
+    # HOW LOUD THE CALL NEEDS TO BE
     target_call_rms = bg_rms * (10 ** (snr_db / 20.0))
+    # HOW MUCH TO SCALE IT
     scale_factor = target_call_rms / (call_rms + 1e-12)
     scaled_call = call * scale_factor
+    ###############
 
+
+    ##################
+    # ADD IN PLACE
     mixed[offset_samples:end] += scaled_call
-
-    # Measure actual SNR
+    # ACTUAL SNR MEASURED AFTER INJECTION 
     actual_snr_db = 20 * np.log10(_rms(scaled_call) / (bg_rms + 1e-12))
 
     return mixed, float(scale_factor), float(actual_snr_db)
@@ -127,13 +129,11 @@ def inject_call(background: np.ndarray,call: np.ndarray,offset_samples: int,snr_
 
 
 
-# main injection
 def inject_calls_into_recording(background: np.ndarray,fs: int,calls: list[tuple[str, np.ndarray]],snr_db_range: tuple[float, float] = (5.0, 20.0),min_gap_s: float = 2.0,seed: Optional[int] = None,logger=None) -> tuple[np.ndarray, list[InjectionEvent]]:
-
     if seed is not None:
         np.random.seed(seed)
 
-    bg_dur_s = len(background) / fs
+    # bg_dur_s = len(background) / fs
     mixed = background.copy()
     events: list[InjectionEvent] = []
 
@@ -218,10 +218,10 @@ def save_injection_results(mixed: np.ndarray,fs: int,events: list[InjectionEvent
         writer.writeheader()
         for e in events:
             writer.writerow({
-                "call_type":    e.call_type,
-                "offset_s":     e.offset_s,
-                "duration_s":   e.duration_s,
-                "snr_db":       e.snr_db,
+                "call_type": e.call_type,
+                "offset_s": e.offset_s,
+                "duration_s": e.duration_s,
+                "snr_db": e.snr_db,
                 "actual_snr_db": e.actual_snr_db,
                 "scale_factor": e.scale_factor,
             })
