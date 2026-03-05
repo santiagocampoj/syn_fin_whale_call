@@ -1,0 +1,2 @@
+ABS_PATH_BallenyIslands2015 = r"C:\Users\Santi\OneDrive - UPV\TFM - Santiago Campo Jurado\datasets\AcousticTrends_BlueFinLibrary\BallenyIslands2015"
+ABS_PATH_BP20HZ = r"C:\Users\Santi\OneDrive - UPV\TFM - Santiago Campo Jurado\datasets\AcousticTrends_BlueFinLibrary\BallenyIslands2015\Balleny2015.Bp20Hz.selections.txt"

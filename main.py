@@ -10,6 +10,9 @@ A batch generator creates a labelled database of .wav files + a metadata CSV.
 """
 
 import argparse
+import soundfile as sf
+import glob
+
 
 from class_params import *
 from randomizer import *
@@ -20,8 +23,6 @@ from logging_config import setup_logging
 from call_injection import *
 from config import *
 from snr_databse import *
-import soundfile as sf
-import glob
 
 
 
