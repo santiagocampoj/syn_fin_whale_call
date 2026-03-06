@@ -27,12 +27,37 @@ def randomize_downsweep(p: DownsweepParams, delta: float = 1.0) -> DownsweepPara
     )
 
 
+# def randomize_pulse(p: PulseParams, delta: float = 1.0) -> PulseParams:
+#     return PulseParams(
+#         fs=p.fs,
+#         pulse_dur=randomize(p.pulse_dur, delta=delta * 0.05, rel=True),# +-5% pulse duration
+#         f0=randomize(p.f0, delta=delta * 0.5), # +-0.5 Hz start freq
+#         f1=randomize(p.f1, delta=delta * 0.5), # +-0.5 Hz end freq
+#         inter_pulse_gap=randomize(p.inter_pulse_gap, delta=delta * 0.01),# +-10 ms gap
+#         amplitude=randomize(p.amplitude,delta=delta * 0.03, rel=True),# +-3% amplitude
+#     )
+
+
 def randomize_pulse(p: PulseParams, delta: float = 1.0) -> PulseParams:
+    new_f0 = randomize(p.f0, delta=delta * 0.8) # ±0.8 Hz
+    new_f1 = randomize(p.f1, delta=delta * 0.8) # ±0.8 Hz
+
+    # ensure f0 > f1 always
+    if new_f0 <= new_f1:
+        new_f0, new_f1 = new_f1 + 0.5, new_f1
+
     return PulseParams(
         fs=p.fs,
-        pulse_dur=randomize(p.pulse_dur, delta=delta * 0.05, rel=True),# +-5% pulse duration
-        f0=randomize(p.f0, delta=delta * 0.5), # +-0.5 Hz start freq
-        f1=randomize(p.f1, delta=delta * 0.5), # +-0.5 Hz end freq
-        inter_pulse_gap=randomize(p.inter_pulse_gap, delta=delta * 0.01),# +-10 ms gap
-        amplitude=randomize(p.amplitude,delta=delta * 0.03, rel=True),# +-3% amplitude
+        pulse_dur=randomize(p.pulse_dur, delta=delta * 0.03, rel=True), # ±3%
+        f0=new_f0,
+        f1=new_f1,
+        inter_pulse_gap=randomize(p.inter_pulse_gap, delta=delta * 0.02), # ±0.02s
+        amplitude=randomize(p.amplitude,delta=delta * 0.03, rel=True), # ±3%
+        
+        
+        # ADSR: small perturbations so each call sounds slightly different
+        attack_s=randomize(p.attack_s, delta=delta * 0.01), # ±0.01s
+        decay_s=randomize(p.decay_s, delta=delta * 0.02), # ±0.02s
+        sustain_level=randomize(p.sustain_level, delta=delta * 0.05), # ±0.05
+        release_s=randomize(p.release_s, delta=delta * 0.03), # ±0.03s
     )

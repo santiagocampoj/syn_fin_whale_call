@@ -13,6 +13,8 @@ class DownsweepParams:
     harmonics: bool = True
     amplitude: float = 0.95
 
+
+
 @dataclass
 class PulseParams:
     """Parameters for the 20 Hz pulse call"""
@@ -22,6 +24,12 @@ class PulseParams:
     f1: float = 17.0
     inter_pulse_gap: float = 0.22 #it was raised from 0.12 to 0.22 s (doublet visible)
     amplitude: float = 0.95
+    # ADSR envelope parameters
+    attack_s: float = 0.05 # short, whale calls start fast
+    decay_s: float = 0.10 # quick drop to sustain level
+    sustain_level: float = 0.80 # amplitude during sustain (0–1)
+    release_s: float = 0.25 
+
 
 
 @dataclass
