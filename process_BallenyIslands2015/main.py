@@ -12,6 +12,7 @@ def convert_txt_to_csv(logger=None):
     output_csv = ABS_PATH_BP20HZ.replace('.txt', '.csv')
     df.to_csv(output_csv, index=False)
     logger.info(f"Saved CSV: {output_csv}")
+    return df
 
 
 
@@ -45,12 +46,15 @@ def extract_pulse_clips(df: pd.DataFrame,wav_dir: str,output_dir: str,padding_s:
             logger.info(f"Sample rate: {sr}, Total samples: {total_samples}")
 
 
-            #padding
+            #padding the samples
             padding_samples = int(padding_s * sr)
             start_sample = max(0, int(row['Beg File Samp (samples)']) - padding_samples)
             end_sample = min(total_samples, int(row['End File Samp (samples)']) + padding_samples)
 
             logger.info(f"Start sample: {start_sample}, End sample: {end_sample}")
+            logger.info(f"Start time in file: {start_sample / sr:.2f}s")
+            logger.info(f"End time in file:   {end_sample / sr:.2f}s")
+            logger.info(f"Clip duration: {clip.shape[0]/sr:.2f}s")
 
             # clippling
             wav_file.seek(start_sample)
@@ -61,7 +65,8 @@ def extract_pulse_clips(df: pd.DataFrame,wav_dir: str,output_dir: str,padding_s:
         out_name = f"sel{selection_id:04d}_{wav_filename}"
         out_path = os.path.join(output_dir, out_name)
         sf.write(out_path, clip, sr)
-        logger.info(f"Saved: {out_path}  ({clip.shape[0]/sr:.2f}s)")
+        logger.info(f"Saved: {out_path}")
+        
 
 
 
@@ -72,7 +77,11 @@ def main() -> None:
     logger.info("Starting 20Hz pulse extraction")
     logger.info("")
 
-    convert_txt_to_csv(logger)
+
+    df = convert_txt_to_csv(logger)
+    # print(df)
+    # print(df.columns)
+    # exit()
 
     df = parse_selection_table(ABS_PATH_BP20HZ, logger)
     logger.info(f"Loaded {len(df)} selections")
