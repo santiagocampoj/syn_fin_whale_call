@@ -54,7 +54,7 @@ def extract_pulse_clips(df: pd.DataFrame,wav_dir: str,output_dir: str,padding_s:
             logger.info(f"Start sample: {start_sample}, End sample: {end_sample}")
             logger.info(f"Start time in file: {start_sample / sr:.2f}s")
             logger.info(f"End time in file:   {end_sample / sr:.2f}s")
-            logger.info(f"Clip duration: {clip.shape[0]/sr:.2f}s")
+            logger.info(f"Clip duration: {(end_sample - start_sample) / sr:.2f}s")
 
             # clippling
             wav_file.seek(start_sample)
